@@ -1,0 +1,139 @@
+1)  create table NewTable
+	AS
+	select * from OriginalTable;
+
+2) create table NewTable
+	AS 
+	select * from OriginalTable
+	WHERE 'A' = 'B';
+
+3)
+(select * from Student order by id desc limit 10) order by id asc;
+select max(salary),min(salary) from Employee;
+
+4)
+create table transactions(user_id int not null,name varchar(30),amount longint,transcation_date date)
+
+from jinja2 import Template
+from jinjasql import JinjaSql
+from six import string_types
+from copy import deepcopy
+
+user_transaction_template = '''
+select 
+    user_id
+    , count(*) as num_transactions
+    , sum(amount) as total_amount
+from 
+    transactions
+where
+    user_id = 1234
+    and transaction_date = '2022-03-02'
+group by
+    user_id
+'''
+
+params = {
+    'user_id': 1234,
+    'transaction_date': '2022-03-02'
+}
+
+j = JinjaSql(param_style='pyformat')
+query,bind_params = j.prepare_query(user_transaction_template,params)
+
+print(query %bind_params)
+
+5)
+select * from Student where FirstName like 'P%' and Surname like '%S';
+
+
+6)
+select * from Student order by id desc limit 1;
+
+7)
+CREATE TABLE Employees
+(
+  EmployeeID int NOT NULL PRIMARY KEY,
+  FirstName varchar(50) NOT NULL,
+  LastName varchar(50) NOT NULL,
+  ManagerID int NULL
+)
+
+INSERT INTO Employees VALUES (1, 'Ken', 'Thompson', NULL)
+INSERT INTO Employees VALUES (2, 'Terri', 'Ryan', 1)
+INSERT INTO Employees VALUES (3, 'Robert', 'Durello', 1)
+INSERT INTO Employees VALUES (4, 'Rob', 'Bailey', 2)
+INSERT INTO Employees VALUES (5, 'Kent', 'Erickson', 2)
+INSERT INTO Employees VALUES (6, 'Bill', 'Goldberg', 3)
+INSERT INTO Employees VALUES (7, 'Ryan', 'Miller', 3)
+INSERT INTO Employees VALUES (8, 'Dane', 'Mark', 5)
+INSERT INTO Employees VALUES (9, 'Charles', 'Matthew', 6)
+INSERT INTO Employees VALUES (10, 'Michael', 'Jhonson', 6) 
+
+WITH
+  cteReports (EmpID, FirstName, LastName, MgrID, EmpLevel)
+  AS
+  (
+    SELECT EmployeeID, FirstName, LastName, ManagerID, 1
+    FROM Employees
+    WHERE ManagerID IS NULL
+    UNION ALL
+    SELECT e.EmployeeID, e.FirstName, e.LastName, e.ManagerID, 
+      r.EmpLevel + 1
+    FROM Employees e
+      INNER JOIN cteReports r
+        ON e.ManagerID = r.EmpID
+  )
+SELECT
+  FirstName + ' ' + LastName AS FullName, 
+  EmpLevel,
+  (SELECT FirstName + ' ' + LastName FROM Employees 
+    WHERE EmployeeID = cteReports.MgrID) AS Manager
+FROM cteReports 
+ORDER BY EmpLevel, MgrID 
+
+8)
+8)  CREATE TRIGGER [dbo].[Customer_UPDATE]
+       ON [dbo].[Customers]
+AFTER UPDATE
+AS
+BEGIN
+       SET NOCOUNT ON;
+ 
+       DECLARE @CustomerId INT
+       DECLARE @Action VARCHAR(50)
+ 
+       SELECT @CustomerId = INSERTED.CustomerId       
+       FROM INSERTED
+ 
+       IF UPDATE(Name)
+       BEGIN
+              SET @Action = 'Updated Name'
+       END
+ 
+       IF UPDATE(Country)
+       BEGIN
+              SET @Action = 'Updated Country'
+       END
+ 
+       INSERT INTO CustomerLogs
+       VALUES(@CustomerId, @Action)
+END
+
+
+
+CREATE TRIGGER [dbo].[Customer_DELETE]
+       ON [dbo].[Customers]
+AFTER DELETE
+AS
+BEGIN
+       SET NOCOUNT ON;
+ 
+       DECLARE @CustomerId INT
+ 
+       SELECT @CustomerId = DELETED.CustomerId       
+       FROM DELETED
+ 
+       INSERT INTO CustomerLogs
+       VALUES(@CustomerId, 'Deleted')
+END
